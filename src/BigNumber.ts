@@ -27,34 +27,72 @@ class BigNumber{
     }
   }
 
-  equal(big: BigNumber | BigNumberData){
-    let _big = BigNumber.from(big).toString()
-    , _val = this.toString();
+  eq(big: BigNumber | BigNumberData){
+    let _big = BigNumber.from(big).toString(), _val = this.toString();
     
-    const vNegative = !!_val.match(/^-/)
-    , bNegative = !!_big.match(/^-/)
+    const vNegative = !!_val.match(/^-/), bNegative = !!_big.match(/^-/)
     , oneNegative = ((vNegative && !bNegative) || (!vNegative && bNegative));
 
     if (oneNegative) return false;
 
-    _big = _big.replace('-', '');
-    _val = _val.replace('-', '');
+    const [ intB, decB ] = _big.replace('-', '').split('.');
+    const [ intV, decV ] = _val.replace('-', '').split('.');
 
-    if (_big.length !== _val.length) return false;
+    if (intB.length !== intV.length) return false;
 
-    for (let i = 0; i < _big.length; i++){
-      if (_big[i] !== _val[i]) return false;
+    for (let i = 0; i < intB.length; i++){
+      if (parseInt(intB[i]) !== parseInt(intV[i])) return false;
+    }
+
+    if (decB === undefined && decV === undefined) return true;
+    if (decB === undefined || decV === undefined) return false;
+    if (decB.length !== decV.length) return false;
+
+    for (let i = 0; i < decB.length; i++){
+      if (parseInt(decB[i]) !== parseInt(decV[i])) return false;
     }
 
     return true;
   }
 
   lt(big: BigNumber | BigNumberData){
+    let _big = BigNumber.from(big).toString(), _val = this.toString();
 
+    const vNegative = !!_val.match(/^-/), bNegative = !!_big.match(/^-/)
+
+    if (vNegative && !bNegative) return true;
+    if (!vNegative && bNegative) return false;
+
+    const [ intB, decB ] = _big.replace('-', '').split('.');
+    const [ intV, decV ] = _val.replace('-', '').split('.');
+
+    if (intB.length < intV.length) return vNegative;
+    if (intB.length > intV.length) return !vNegative;
+
+    for (let i = 0; i < intB.length; i++){
+      if (parseInt(intB[i]) < parseInt(intV[i])) return vNegative;
+      if (parseInt(intB[i]) > parseInt(intV[i])) return !vNegative;
+    }
+
+    if (decB === undefined && decV === undefined) return false;
+    if (decB === undefined) return false;
+    if (decV === undefined) return true;
+
+    const length = Math.min(decB.length, decV.length);
+
+    for (let i  = 0; i < length; i++){
+      if (parseInt(decB[i]) < parseInt(decV[i])) return vNegative;
+      if (parseInt(decB[i]) > parseInt(decV[i])) return !vNegative;
+    }
+
+    if (decB.length < decV.length) return vNegative;
+    if (decB.length > decV.length) return !vNegative;
+    
+    return false;
   }
 
   lte(big: BigNumber | BigNumberData){
-
+    return this.lt(big) || this.eq(big);
   }
 
   gt(big: BigNumber | BigNumberData){
@@ -102,14 +140,14 @@ class BigNumber{
       , rs: Array<number | string> = [];
 
       let localGiveBack = giveBack;
-console.log({ valA, valB })
+
       valA.forEach((val, index) => {
         let charA = parseInt(val), charB = parseInt(valB[index]);
         
         localGiveBack && ++charB;
         localGiveBack = charA < charB;
         localGiveBack && (charA += 10);
-console.log(localGiveBack)
+
         rs.push(charA - charB);
       });
 

@@ -1,3 +1,23 @@
 import { Meta } from '@storybook/addon-docs';
 
 <Meta title="Prototype/BigNumber.prototype.contructor()" />
+
+# BigNumber.prototype.constructor()
+
+```tsx
+BigNumber.prototype.constructor(value?: BigNumberData): BigNumber;
+```
+
+Initialize a big number. The `value` parameter is defaut value of object. 
+If the `value` parameter is not passed, default value is empty string.
+
+## Usage
+
+```tsx
+const bigA = new BigNumber('11111111111111111111111111111111111111111111');
+console.log(bigA);
+
+// Output: BigNumber { _value: "11111111111111111111111111111111111111111111" }
+```
+
+In addition, method [BigNumber.from()](./?path=/story/static-bignumber-from--page) can be used to initialize object B.

@@ -1,5 +1,9 @@
 export const parameters = {
-  server: {
-    url: 'http://storybook-server-demo.netlify.app/api',
+  actions: { argTypesRegex: "^on[A-Z].*" },
+  controls: {
+    matchers: {
+      color: /(background|color)$/i,
+      date: /Date$/,
+    },
   },
-};
+}
