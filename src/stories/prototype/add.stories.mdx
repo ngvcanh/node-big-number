@@ -7,3 +7,68 @@ import { Meta } from '@storybook/addon-docs';
 ```tsx
 BigNumber.prototype.add(...bigs: Array<BigNumber | BigNumberData>): BigNumber
 ```
+
+Add other BigNumbers to a BigNumber. The result is a new BigNumber
+
+## Add BigNumber to BigNumber
+
+```tsx
+const bigA = BigNumber.from('1111111111111111111111111111111111111111111111111');
+const bigB = BigNumber.from('2222222222222222222222222222222222222222222222222');
+const bigC = bigA.add(bigB);
+console.log(bigC);
+
+// Output: BigNumber { "3333333333333333333333333333333333333333333333333" }
+```
+
+## Add number to a BigNumber
+
+```tsx
+const bigA = BigNumber.from('1111111111111111111111111111111111111111111111111');
+const bigB = bigA.add(11111);
+console.log(bigB);
+
+// Output: BigNumber { "1111111111111111111111111111111111111111111122222" }
+```
+
+## Add string number to BigNumber
+
+```tsx
+const bigA = BigNumber.from('1111111111111111111111111111111111111111111111111');
+const bigB = bigA.add('11111');
+console.log(bigB);
+
+// Output: BigNumber { "1111111111111111111111111111111111111111111122222" }
+```
+
+## Add string number formatted to BigNumber
+
+```tsx
+const bigA = BigNumber.from('1111111111111111111111111111111111111111111111111');
+const bigB = bigA.add('11,111');
+console.log(bigB);
+
+// Output: BigNumber { "1111111111111111111111111111111111111111111122222" }
+```
+
+## Add string number formatted comma to BigNumber
+
+```tsx
+const bigA = BigNumber.from('1111111111111111111111111111111111111111111111111');
+const bigB = bigA.add('11.111,12');
+console.log(bigB);
+
+// Output: BigNumber { "1111111111111111111111111111111111111111111122222.12" }
+```
+
+## Add multiple value to BigNumber
+
+```tsx
+const bigA = BigNumber.from('1111111111111111111111111111111111111111111111111');
+const bigB = BigNumber.from('1111111111111111111111111111111111111111111111111');
+const bigC = BigNumber.from('1111111111111111111111111111111111111111111111111');
+const bigD = bigA.add(bigB, bigC, '11111', 11111, '11,111', '11.111,12');
+console.log(bigD)
+
+// Output: BigNumber { "3333333333333333333333333333333333333333333377777.12" }
+```

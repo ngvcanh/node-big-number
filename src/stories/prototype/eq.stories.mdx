@@ -1,3 +1,52 @@
 import { Meta } from '@storybook/addon-docs';
 
 <Meta title="Prototype/BigNumber.prototype.eq()" />
+
+# BigNumber.prototype.eq()
+
+```tsx
+BigNumber.prototype.eq(big: BigNumber | BigNumberData): boolean
+```
+
+Compare the equality with another `BigNumber`.
+
+## Compare with BigNumber
+
+```tsx
+const bigA = BigNumber.from('11111111111111111111111111111111111111111111');
+const bigB = BigNumber.from('11111111111111111111111111111111111111111111');
+const bigC = BigNumber.from('22222222222222222222222222222222222222222222');
+
+console.log(bigA.eq(bigB));
+// Output: true
+
+console.log(bigA.eq(bigC));
+// Output: false
+```
+
+## Compare with number
+
+```tsx
+const bigA = BigNumber.from('111111');
+
+console.log(bigA.eq(111111));
+// Output: true
+
+console.log(bigA.eq(222222));
+// Output: false
+```
+
+## Compare with string number values
+
+```tsx
+const bigA = BigNumber.from('111111111');
+
+console.log(bigA.eq('111111111'));
+// Output: true
+
+console.log(bigA.eq('111,111,111'));
+// Output: true
+
+console.log(bigA.eq('111.111.111'));
+// Output: true
+```
