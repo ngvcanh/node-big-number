@@ -5,6 +5,8 @@ import { Meta } from '@storybook/addon-docs';
 # BigNumber.prototype.eq()
 
 ```tsx
+import BigNumber from '@kensoni/big-number';
+
 BigNumber.prototype.eq(big: BigNumber | BigNumberData): boolean
 ```
 
@@ -13,6 +15,8 @@ Compare the equality with another `BigNumber`.
 ## Compare with BigNumber
 
 ```tsx
+import BigNumber from '@kensoni/big-number';
+
 const bigA = BigNumber.from('11111111111111111111111111111111111111111111');
 const bigB = BigNumber.from('11111111111111111111111111111111111111111111');
 const bigC = BigNumber.from('22222222222222222222222222222222222222222222');
@@ -27,6 +31,8 @@ console.log(bigA.eq(bigC));
 ## Compare with number
 
 ```tsx
+import BigNumber from '@kensoni/big-number';
+
 const bigA = BigNumber.from('111111');
 
 console.log(bigA.eq(111111));
@@ -39,6 +45,8 @@ console.log(bigA.eq(222222));
 ## Compare with string number values
 
 ```tsx
+import BigNumber from '@kensoni/big-number';
+
 const bigA = BigNumber.from('111111111');
 
 console.log(bigA.eq('111111111'));

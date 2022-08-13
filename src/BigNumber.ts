@@ -4,6 +4,12 @@ class BigNumber{
 
   private _value: BigNumberData = '';
 
+  private _integer: string = '';
+
+  private _decimal: string = '';
+
+  private _nevigate: boolean = false;
+
   static MAX_INTEGER = Number.MAX_SAFE_INTEGER;
 
   static MIN_INTEGER = Number.MIN_SAFE_INTEGER;
@@ -25,82 +31,192 @@ class BigNumber{
         this._value = val;
       }
     }
+
+    [ this._integer, this._decimal ] = this._value.toString().split('.');
+    if (this._decimal === undefined) this._decimal = '';
+    
+    this._nevigate = this._integer.startsWith('-');
+    this._integer = this._integer.replace(/^-/, '').replace(/^0+/, '0');
+    this._decimal = this._decimal.replace(/0+$/, '');
+  }
+
+  get value(){
+    return this._value;
+  }
+
+  get int(){
+    return this._integer;
+  }
+
+  get dec(){
+    return this._decimal;
+  }
+
+  get negative(){
+    return this._nevigate;
   }
 
   eq(big: BigNumber | BigNumberData){
-    let _big = BigNumber.from(big).toString(), _val = this.toString();
+    const _big = BigNumber.from(big);
+    let { int: _bigInt, dec: _bigDec } = _big, { int: _valInt, dec: _valDec } = this;
     
-    const vNegative = !!_val.match(/^-/), bNegative = !!_big.match(/^-/)
-    , oneNegative = ((vNegative && !bNegative) || (!vNegative && bNegative));
+    if (
+      (this.negative && !_big.negative) || 
+      (!this.negative && _big.negative)
+    ) return false;
 
-    if (oneNegative) return false;
+    _valInt = _valInt.replace('-', '');
+    _bigInt = _bigInt.replace('-', '');
 
-    const [ intB, decB ] = _big.replace('-', '').split('.');
-    const [ intV, decV ] = _val.replace('-', '').split('.');
+    if (_valInt.length !== _bigInt.length) return false;
 
-    if (intB.length !== intV.length) return false;
-
-    for (let i = 0; i < intB.length; i++){
-      if (parseInt(intB[i]) !== parseInt(intV[i])) return false;
+    for (let i = 0; i < _bigInt.length; i++){
+      if (parseInt(_bigInt[i]) !== parseInt(_valInt[i])) return false;
     }
 
-    if (decB === undefined && decV === undefined) return true;
-    if (decB === undefined || decV === undefined) return false;
-    if (decB.length !== decV.length) return false;
+    if (_bigDec === '' && _valDec === '') return true;
+    if (_bigDec === '' || _valDec === '') return false;
+    if (_bigDec.length !== _valDec.length) return false;
 
-    for (let i = 0; i < decB.length; i++){
-      if (parseInt(decB[i]) !== parseInt(decV[i])) return false;
+    for (let i = 0; i < _bigDec.length; i++){
+      if (parseInt(_bigDec[i]) !== parseInt(_valDec[i])) return false;
     }
 
     return true;
   }
 
   lt(big: BigNumber | BigNumberData){
-    let _big = BigNumber.from(big).toString(), _val = this.toString();
+    const _big = BigNumber.from(big)
+    let { int: _bigInt, dec: _bigDec } = _big, { int: _valInt, dec: _valDec } = this;
 
-    const vNegative = !!_val.match(/^-/), bNegative = !!_big.match(/^-/)
+    if (this.negative && !_big.negative) return true;
+    if (!this.negative && _big.negative) return false;
 
-    if (vNegative && !bNegative) return true;
-    if (!vNegative && bNegative) return false;
+    if (_bigInt.length < _valInt.length) return this.negative;
+    if (_bigInt.length > _valInt.length) return !this.negative;
 
-    const [ intB, decB ] = _big.replace('-', '').split('.');
-    const [ intV, decV ] = _val.replace('-', '').split('.');
-
-    if (intB.length < intV.length) return vNegative;
-    if (intB.length > intV.length) return !vNegative;
-
-    for (let i = 0; i < intB.length; i++){
-      if (parseInt(intB[i]) < parseInt(intV[i])) return vNegative;
-      if (parseInt(intB[i]) > parseInt(intV[i])) return !vNegative;
+    for (let i = 0; i < _bigInt.length; i++){
+      if (parseInt(_bigInt[i]) < parseInt(_valInt[i])) return this.negative;
+      if (parseInt(_bigInt[i]) > parseInt(_valInt[i])) return !this.negative;
     }
 
-    if (decB === undefined && decV === undefined) return false;
-    if (decB === undefined) return false;
-    if (decV === undefined) return true;
+    if (_bigDec === '' && _valDec === '') return false;
+    if (_bigDec === '') return this.negative;
+    if (_valDec === '') return !this.negative;
 
-    const length = Math.min(decB.length, decV.length);
+    const length = Math.min(_bigDec.length, _valDec.length);
 
     for (let i  = 0; i < length; i++){
-      if (parseInt(decB[i]) < parseInt(decV[i])) return vNegative;
-      if (parseInt(decB[i]) > parseInt(decV[i])) return !vNegative;
+      if (parseInt(_bigDec[i]) < parseInt(_valDec[i])) return this.negative;
+      if (parseInt(_bigDec[i]) > parseInt(_valDec[i])) return !this.negative;
     }
 
-    if (decB.length < decV.length) return vNegative;
-    if (decB.length > decV.length) return !vNegative;
+    if (_bigDec.length < _valDec.length) return this.negative;
+    if (_bigDec.length > _valDec.length) return !this.negative;
     
     return false;
   }
 
   lte(big: BigNumber | BigNumberData){
-    return this.lt(big) || this.eq(big);
+    const _big = BigNumber.from(big)
+    let { int: _bigInt, dec: _bigDec } = _big, { int: _valInt, dec: _valDec } = this;
+
+    if (this.negative && !_big.negative) return true;
+    if (!this.negative && _big.negative) return false;
+
+    if (_bigInt.length < _valInt.length) return this.negative;
+    if (_bigInt.length > _valInt.length) return !this.negative;
+
+    for (let i = 0; i < _bigInt.length; i++){
+      if (parseInt(_bigInt[i]) < parseInt(_valInt[i])) return this.negative;
+      if (parseInt(_bigInt[i]) > parseInt(_valInt[i])) return !this.negative;
+    }
+
+    if (_bigDec === '' && _valDec === '') return true;
+    if (_bigDec === '') return this.negative;
+    if (_valDec === '') return !this.negative;
+
+    const length = Math.min(_bigDec.length, _valDec.length);
+
+    for (let i  = 0; i < length; i++){
+      if (parseInt(_bigDec[i]) < parseInt(_valDec[i])) return this.negative;
+      if (parseInt(_bigDec[i]) > parseInt(_valDec[i])) return !this.negative;
+    }
+
+    if (_bigDec.length < _valDec.length) return this.negative;
+    if (_bigDec.length > _valDec.length) return !this.negative;
+    
+    return true;
   }
 
   gt(big: BigNumber | BigNumberData){
+    const _big = BigNumber.from(big)
+    let { int: _bigInt, dec: _bigDec } = _big, { int: _valInt, dec: _valDec } = this;
 
+    if (this.negative && !_big.negative) return false;
+    if (!this.negative && _big.negative) return true;
+
+    _valInt = _valInt.replace('-', '');
+    _bigInt = _bigInt.replace('-', '');
+
+    if (_bigInt.length > _valInt.length) return this.negative;
+    if (_bigInt.length < _valInt.length) return !this.negative;
+
+    for (let i = 0; i < _bigInt.length; i++){
+      if (parseInt(_bigInt[i]) > parseInt(_valInt[i])) return this.negative;
+      if (parseInt(_bigInt[i]) < parseInt(_valInt[i])) return !this.negative;
+    }
+
+    if (_bigDec === '' && _valDec === '') return false;
+    if (_bigDec === '') return !this.negative;
+    if (_valDec === '') return this.negative;
+
+    const length = Math.min(_bigDec.length, _valDec.length);
+
+    for (let i  = 0; i < length; i++){
+      if (parseInt(_bigDec[i]) > parseInt(_valDec[i])) return this.negative;
+      if (parseInt(_bigDec[i]) < parseInt(_valDec[i])) return !this.negative;
+    }
+
+    if (_bigDec.length > _valDec.length) return this.negative;
+    if (_bigDec.length < _valDec.length) return !this.negative;
+    
+    return false;
   }
 
   gte(big: BigNumber | BigNumberData){
+    const _big = BigNumber.from(big)
+    let { int: _bigInt, dec: _bigDec } = _big, { int: _valInt, dec: _valDec } = this;
 
+    if (this.negative && !_big.negative) return false;
+    if (!this.negative && _big.negative) return true;
+
+    _valInt = _valInt.replace('-', '');
+    _bigInt = _bigInt.replace('-', '');
+
+    if (_bigInt.length > _valInt.length) return this.negative;
+    if (_bigInt.length < _valInt.length) return !this.negative;
+
+    for (let i = 0; i < _bigInt.length; i++){
+      if (parseInt(_bigInt[i]) > parseInt(_valInt[i])) return this.negative;
+      if (parseInt(_bigInt[i]) < parseInt(_valInt[i])) return !this.negative;
+    }
+
+    if (_bigDec === '' && _valDec === '') return true;
+    if (_bigDec === '') return !this.negative;
+    if (_valDec === '') return this.negative;
+
+    const length = Math.min(_bigDec.length, _valDec.length);
+
+    for (let i  = 0; i < length; i++){
+      if (parseInt(_bigDec[i]) > parseInt(_valDec[i])) return this.negative;
+      if (parseInt(_bigDec[i]) < parseInt(_valDec[i])) return !this.negative;
+    }
+
+    if (_bigDec.length > _valDec.length) return this.negative;
+    if (_bigDec.length < _valDec.length) return !this.negative;
+    
+    return true;
   }
 
   add(...bigs: Array<BigNumber | BigNumberData>){

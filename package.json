@@ -3,7 +3,7 @@
   "version": "0.0.1",
   "private": true,
   "dependencies": {},
-  "main": "inded.js",
+  "main": "index.js",
   "keywords": [
     "big-number"
   ],
