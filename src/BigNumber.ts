@@ -1,5 +1,220 @@
 import { BigNumberData, BigNumberFormatOptions } from "./types";
 
+function addBigNumber(big1: BigNumber | BigNumberData, big2: BigNumber | BigNumberData): BigNumber{
+  return BigNumber.from(0);
+}
+
+/**
+ * - INTERNAL FUNCTION
+ * - Ensure that `big1` greater than `big2`
+ */
+export function minusGreaterThan(big1: BigNumber | BigNumberData, big2: BigNumber | BigNumberData): BigNumber{
+  const _big1 = BigNumber.from(big1), _big2 = BigNumber.from(big2);
+
+  let { int: int1, dec: dec1, negative: neg1 } = _big1
+  , { int: int2, dec: dec2, negative: neg2 } = _big2;
+
+  // negative minus negative
+  if (neg1 && neg2) return minusGreaterThan(_big2.abs(), _big1.abs());
+
+  // positive minus negative
+  if (neg2 && !neg1) return addBigNumber(_big1, _big2.abs());
+
+  // positive minus positive
+  let dec = '', int = '', borrow = false;
+
+  if (dec2 === '0' || dec2 === ''){
+    dec = dec1;
+  }
+  else{
+    const max = Math.max(dec1.length, dec2.length);
+    
+    for (let i = max - 1; i >= 0; i--){
+      let char1 = parseInt(dec1[i] ?? '0'), char2 = parseInt(dec2[i] ?? '0');
+      
+      if (borrow){
+        char2 += 1;
+        borrow = false;
+      }
+
+      if (char1 < char2){
+        char1 += 10;
+        borrow = true;
+      }
+
+      dec = (char1 - char2) + dec;
+    }
+  }
+
+  for (let i = int1.length - 1; i >= 0; i++){
+    let char1 = parseInt(int1[i]), char2 = parseInt(int2[1] ?? '0');
+
+    if (borrow){
+      char2 += 1;
+      borrow = false;
+    }
+
+    if (char1 < char2){
+      char1 += 10;
+      borrow = true;
+    }
+
+    int = (char1 - char2) + int;
+  }
+
+  return BigNumber.from(`${ int }.${ dec }`);
+}
+
+function minus(big1: BigNumber | BigNumberData, big2: BigNumber | BigNumberData){
+  const _big1 = BigNumber.from(big1), _big2 = BigNumber.from(big2);
+
+  // A - B with B = 0 => return A
+  if (_big2.value === '0' || _big2.value === '') return _big1;
+  
+  // A - B with A = 0: 
+  //  If B = 0 then return 0;
+  //  Else revert sign of B;
+  if (_big1.value === '0' || _big1.value === ''){
+    if (_big2.value === '0' || _big2.value === '') return BigNumber.from(0);
+    if (_big2.negative) return _big2.abs();
+    return BigNumber.from('-' + _big2.value);
+  }
+  
+  // A - B with A = B return 0
+  if (_big1.eq(big2)) return BigNumber.from(0);
+
+  // A - B with A > B
+  if (_big1.gt(big2)) return minusGreaterThan(_big1, _big2);
+
+  // A - B with A < B and A * B > 0
+  if (_big1.sameSign(_big2)) return minusGreaterThan(_big2, _big1);
+
+  // A - B with A < B and A * B < 0
+  return BigNumber.from(addBigNumber(_big1.abs(), _big2).value);
+}
+
+function createBuckets(bigs: Array<BigNumber | BigNumberData>, size: number){
+    // let min = bigs[0], max = bigs[0];
+
+    // for (let i = 1; i < bigs.length; i++) {
+    //   if (BigNumber.from(bigs[i]).lt(min)){
+    //      min = bigs[i];
+    //   }
+    //   else if (BigNumber.from(bigs[i]).gt(max)){
+    //     max = bigs[i];
+    //   }
+    // }
+    // const count = Math.floor((max - min) / bucketSize) + 1;
+
+    // // initialize each bucket (a multidimensional array)
+    // const buckets = [];
+    // for (let i = 0; i < bucketCount; i++) {
+    //     buckets[i] = [];
+    // }
+
+    // // distribute elements into buckets
+    // for (let i = 0; i < arr.length; i++) {
+    //     const bucketIndex = Math.floor((arr[i] - min) / bucketSize);
+    //     buckets[bucketIndex].push(arr[i]);
+    // }
+    // return buckets;
+}
+
+const SORT = {
+  bubble(bigs: Array<BigNumber | BigNumberData>){
+    const length = bigs.length;
+
+    for (let i = 0; i < length - 1; i++){
+      let swapped = Boolean(true);
+      
+      for (let j = 0; j < length - i - 1; j++){
+        if (BigNumber.from(bigs[j]).gt(bigs[j + 1])){
+          const temp = bigs[j];
+          bigs[j] = bigs[j + 1];
+          bigs[j + 1] = temp;
+          swapped = false;
+        }
+      }
+    
+      if (swapped === true) break;
+    }
+
+    return bigs;
+  },
+  selection(bigs: Array<BigNumber | BigNumberData>){
+    const length = bigs.length;
+
+    for (let step = 0; step < length - 1; step++) {
+      let min_idx = step;
+
+      for (let i = step + 1; i < length; i++) {
+        if (BigNumber.from(bigs[i]).lt(bigs[min_idx])) min_idx = i;
+      }
+
+      let temp = bigs[step];
+      bigs[step] = bigs[min_idx];
+      bigs[min_idx] = temp;
+    }
+
+    return bigs;
+  },
+  insertion(bigs: Array<BigNumber | BigNumberData>){
+    const length = bigs.length;
+    
+    for (let step = 1; step < length; step++) {
+      const key = bigs[step];
+      let j = step - 1;
+
+      while (j >= 0 && BigNumber.from(key).lt(bigs[j])){
+        bigs[j + 1] = bigs[j];
+        --j;
+      }
+
+      bigs[j + 1] = key;
+    }
+
+    return bigs;
+  },
+  quick(){},
+  radix(){},
+  merge(bigs: Array<BigNumber | BigNumberData>){
+    // if (bigs.length > 1) {
+    //     const { length } = bigs;
+    //     const middle = Math.floor(length / 2);
+    //     const left = SORT.merge(bigs.slice(0, middle), compare);
+    //     const right = SORT.merge(bigs.slice(middle, length), compare);
+    //     arr = merge(left, right, compare);
+    // }
+    // return arr;
+  },
+  heap(){
+
+  },
+  shaker(){
+
+  },
+  shell(){
+
+  },
+  counting(){
+
+  },
+  binaryinsetion(){
+
+  },
+  interchange(){
+
+  },
+
+  /**
+   * Best case scenario: complexity = O(N + k)
+   * Worst case scenario: complexity = O(N^2)
+   */
+  bucket(){
+
+  }
+}
+
 class BigNumber{
 
   private _value: BigNumberData = '';
@@ -36,8 +251,7 @@ class BigNumber{
     if (this._decimal === undefined) this._decimal = '';
     
     this._nevigate = this._integer.startsWith('-');
-    this._integer = this._integer.replace(/^-/, '').replace(/^0+/, '0');
-    this._decimal = this._decimal.replace(/0+$/, '');
+    this._integer = this._integer.replace(/^-/, '').replace(/^0+/, '0')
   }
 
   get value(){
@@ -54,6 +268,11 @@ class BigNumber{
 
   get negative(){
     return this._nevigate;
+  }
+
+  sameSign(big: BigNumber | BigNumberData){
+    const _big = BigNumber.from(big);
+    return (this.negative && _big.negative) || (!this.negative && _big.negative);
   }
 
   eq(big: BigNumber | BigNumberData){
@@ -91,7 +310,7 @@ class BigNumber{
 
     if (this.negative && !_big.negative) return true;
     if (!this.negative && _big.negative) return false;
-
+    
     if (_bigInt.length < _valInt.length) return this.negative;
     if (_bigInt.length > _valInt.length) return !this.negative;
 
@@ -101,8 +320,8 @@ class BigNumber{
     }
 
     if (_bigDec === '' && _valDec === '') return false;
-    if (_bigDec === '') return this.negative;
-    if (_valDec === '') return !this.negative;
+    if (_bigDec === '') return false;
+    if (_valDec === '') return true;
 
     const length = Math.min(_bigDec.length, _valDec.length);
 
@@ -217,6 +436,10 @@ class BigNumber{
     if (_bigDec.length < _valDec.length) return !this.negative;
     
     return true;
+  }
+
+  abs(){
+    return BigNumber.from(this.value.toString().replace('-', ''));
   }
 
   add(...bigs: Array<BigNumber | BigNumberData>){
