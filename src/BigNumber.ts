@@ -95,6 +95,8 @@ class BigNumber{
 
   private _decimal: string = '';
 
+  private _options: BigNumberFormatOptions = {};
+
   private _nevigate: boolean = false;
 
   static MAX_INTEGER = Number.MAX_SAFE_INTEGER;
@@ -105,7 +107,9 @@ class BigNumber{
 
   static MIN_VALUE = Number.MIN_VALUE;
 
-  constructor(value?: BigNumberData){
+  constructor(value?: BigNumberData, options?: BigNumberFormatOptions){
+    this._options = options ?? {};
+
     if (value !== undefined){
       const val = this.revert(value.toString());
       
@@ -225,7 +229,7 @@ class BigNumber{
   }
 
   revert(value: string){
-    return BigNumber.revert(value);
+    return BigNumber.revert(value, this._options);
   }
 
   revertFormat(value: string){
@@ -268,9 +272,9 @@ class BigNumber{
     return BigNumber.isOutOfMin(value);
   }
 
-  static from(value: BigNumber | BigNumberData){
+  static from(value: BigNumber | BigNumberData, options?: BigNumberFormatOptions){
     if (value instanceof BigNumber) return value;
-    return new this(value);
+    return new this(value, options);
   }
 
   static format(value: BigNumberData, options?: BigNumberFormatOptions){
@@ -309,19 +313,22 @@ class BigNumber{
     return formatted;
   }
 
-  static revert(value: string){
+  static revert(value: string, options?: BigNumberFormatOptions){
     if (!this.isMatch(value)) return NaN;
+    if (options?.comma && this.isComma(value)) return this.revertComma(value);
     if (this.isFormat(value)) return this.revertFormat(value);
     if (this.isComma(value)) return this.revertComma(value);
     return value;
   }
 
   static revertFormat(value: string){
+    value = value.trim();
     if (!this.isFormat(value)) return NaN;
     return value.replace(/,/g, '');
   }
 
   static revertComma(value: string){
+    value = value.trim();
     if (!this.isComma(value)) return NaN;
     return value.replace(/\./g, '').replace(',', '.');
   }
