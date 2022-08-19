@@ -146,6 +146,10 @@ class BigNumber{
     return this._nevigate;
   }
 
+  get isDecimal(){
+    return !!this._decimal.length;
+  }
+
   sameSign(big: BigNumber){
     return (this.negative && big.negative) || (!this.negative && big.negative);
   }
