@@ -288,7 +288,7 @@ class BigNumber{
     const arr = _value.split('.');
     const existDec = arr.length > 1;
 
-    const [ _int, _dec ] = arr;
+    const [ _int, _dec = '' ] = arr;
     if (_int.length < 4) return _value;
 
     const { comma, decimal = true, trim } = options ?? {};
