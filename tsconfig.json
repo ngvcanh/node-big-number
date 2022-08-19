@@ -1,9 +1,5 @@
 {
-  "ts-node": {
-    "compilerOptions": {
-      "module": "commonjs"
-    }
-  },
+  
   "compilerOptions": {
     "target": "es5",
     "lib": [
@@ -22,10 +18,19 @@
     "moduleResolution": "node",
     "resolveJsonModule": true,
     "isolatedModules": true,
-    "noEmit": true,
-    "jsx": "react-jsx"
+    "noEmit": false,
+    "jsx": "react-jsx",
+    "outDir": ".",
+    "declaration": true,
+    "declarationDir": "."
   },
   "include": [
-    "src"
+    "src/*.ts"
+  ],
+  "exclude": [
+    "node_modules",
+    "src/stories",
+    "public",
+    ".storybook"
   ]
 }

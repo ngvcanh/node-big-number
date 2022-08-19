@@ -4,7 +4,9 @@ import {
   minusALessThanBPositive,
   minusALessThanBNegative,
   addABPositive,
-  addABNegative
+  addABNegative,
+  aEqualB,
+  aLessThanB
 } from "./utils";
 
 console.log(
@@ -52,5 +54,21 @@ console.log(
   addABNegative(
     '-123456789123456789.1234', 
     '-12345678912345678.123456789'
+  )
+);
+
+console.log(
+  'aEqualB',
+  aEqualB(
+    '123456789123456789.1234', 
+    '123456789123456789.1234', 
+  )
+);
+
+console.log(
+  'aLessThanB',
+  aLessThanB(
+    '12345678912345678.1234', 
+    '123456789123456789.1234', 
   )
 );

@@ -60,15 +60,111 @@ export function aLessThanB(a: string, b: string){
   return false;
 }
 
+export function aLessThanOrEqualB(a: string, b: string){
+  let [ intA, decA ] = a.split('.'), [ intB, decB ] = b.split('.');
+  const aNeg = intA.startsWith('-'), bNeg = intB.startsWith('-');
+
+  if (aNeg && !bNeg) return true;
+  if (!aNeg && bNeg) return false;
+  
+  if (intB.length < intA.length) return aNeg;
+  if (intB.length > intA.length) return !aNeg;
+
+  for (let i = 0; i < intA.length; i++){
+    if (parseInt(intB[i]) < parseInt(intA[i])) return aNeg;
+    if (parseInt(intB[i]) > parseInt(intA[i])) return !aNeg;
+  }
+
+  if (!isDec(decB) && !isDec(decA)) return true;
+  if (!isDec(decB)) return false;
+  if (!isDec(decA)) return true;
+
+  const length = Math.min(decA.length, decB.length);
+
+  for (let i  = 0; i < length; i++){
+    if (parseInt(decB[i]) < parseInt(decA[i])) return aNeg;
+    if (parseInt(decB[i]) > parseInt(decA[i])) return !aNeg;
+  }
+
+  if (decB.length < decA.length) return aNeg;
+  if (decB.length > decA.length) return !aNeg;
+  
+  return true;
+}
+
+export function aGreaterThanB(a: string, b: string){
+  let [ intA, decA ] = a.split('.'), [ intB, decB ] = b.split('.');
+  const aNeg = intA.startsWith('-'), bNeg = intB.startsWith('-');
+
+  if (aNeg && !bNeg) return false;
+  if (!aNeg && bNeg) return true;
+  
+  if (intB.length > intA.length) return aNeg;
+  if (intB.length < intA.length) return !aNeg;
+
+  for (let i = 0; i < intA.length; i++){
+    if (parseInt(intB[i]) > parseInt(intA[i])) return aNeg;
+    if (parseInt(intB[i]) < parseInt(intA[i])) return !aNeg;
+  }
+
+  if (!isDec(decB) && !isDec(decA)) return false;
+  if (!isDec(decB)) return true;
+  if (!isDec(decA)) return false;
+
+  const length = Math.min(decA.length, decB.length);
+
+  for (let i  = 0; i < length; i++){
+    if (parseInt(decB[i]) > parseInt(decA[i])) return aNeg;
+    if (parseInt(decB[i]) < parseInt(decA[i])) return !aNeg;
+  }
+
+  if (decB.length > decA.length) return aNeg;
+  if (decB.length < decA.length) return !aNeg;
+  
+  return false;
+}
+
+export function aGreaterThanOrEqualB(a: string, b: string){
+  let [ intA, decA ] = a.split('.'), [ intB, decB ] = b.split('.');
+  const aNeg = intA.startsWith('-'), bNeg = intB.startsWith('-');
+
+  if (aNeg && !bNeg) return false;
+  if (!aNeg && bNeg) return true;
+  
+  if (intB.length > intA.length) return aNeg;
+  if (intB.length < intA.length) return !aNeg;
+
+  for (let i = 0; i < intA.length; i++){
+    if (parseInt(intB[i]) > parseInt(intA[i])) return aNeg;
+    if (parseInt(intB[i]) < parseInt(intA[i])) return !aNeg;
+  }
+
+  if (!isDec(decB) && !isDec(decA)) return true;
+  if (!isDec(decB)) return true;
+  if (!isDec(decA)) return false;
+
+  const length = Math.min(decA.length, decB.length);
+
+  for (let i  = 0; i < length; i++){
+    if (parseInt(decB[i]) > parseInt(decA[i])) return aNeg;
+    if (parseInt(decB[i]) < parseInt(decA[i])) return !aNeg;
+  }
+
+  if (decB.length > decA.length) return aNeg;
+  if (decB.length < decA.length) return !aNeg;
+  
+  return true;
+}
+
 export function addABPositive(a: string, b: string){
   const [ intA, decA ] = a.split('.'), [ intB, decB ] = b.split('.');
   let dec = '', int = '', surplus = false;
 
   if (!isDec(decB)){
-    dec = decA;
+    dec = decA ?? '';
   }
   else if (!isDec(decA)){
-    dec = decB;
+    dec = decB ?? '';
   }
   else{
     const max = Math.max(decA.length, decB.length);
@@ -113,7 +209,7 @@ export function addABPositive(a: string, b: string){
 
   if (surplus) int = 1 + int;
 
-  return `${ int }.${ dec }`;
+  return `${ int }.${ dec }`.replace(/\.$/, '');
 }
 
 export function addABNegative(a: string, b: string){
@@ -121,7 +217,31 @@ export function addABNegative(a: string, b: string){
 }
 
 export function addAPositiveBNegative(a: string, b: string){
+  const _b = b.replace('-', '');
+  if (aEqualB(a, _b)) return '0';
+  if (aLessThanB(a, _b)) return '-' + minusAGreaterThanBPositive(a, b);
+  return minusAGreaterThanBPositive(a, b);
+}
 
+export function addANegativeBPositive(a: string, b: string){
+  return addAPositiveBNegative(b, a);
+}
+
+export function add(a: string, b: string){
+  if (a.startsWith('-')){
+    if (b.startsWith('-')){
+      return addABNegative(a, b);
+    }
+    else{
+      return addANegativeBPositive(a, b);
+    }
+  }
+  else if (b.startsWith('-')){
+    return addAPositiveBNegative(a, b);
+  }
+  else{
+    return addABPositive(a, b);
+  }
 }
 
 export function minusAGreaterThanBPositive(a: string, b: string){
@@ -129,7 +249,7 @@ export function minusAGreaterThanBPositive(a: string, b: string){
   , dec = '', int = '', borrow = false;
 
   if (!isDec(decB)){
-    dec = decA;
+    dec = decA ?? '';
   }
   else{
     if (decA === undefined) decA = '';
@@ -170,7 +290,7 @@ export function minusAGreaterThanBPositive(a: string, b: string){
     int = (char1 - char2) + int;
   }
 
-  return `${ int }.${ dec }`;
+  return `${ int }.${ dec }`.replace(/\.$/, '');
 }
 
 export function minusAGreaterThanBNegative(a: string, b: string){
@@ -191,4 +311,54 @@ export function minusAPositiveBNagetive(a: string, b: string){
 
 export function minusANegativeBPositive(a: string, b: string){
   return '-' + addABPositive(a.replace('-', ''), b);
+}
+
+function multiplicationWithSingle(a: string, b: string){
+  let rs = '', temp = 0;
+  const _b = parseInt(b);
+
+  for (let i = a.length; i > 0; i--){
+    let char = parseInt(a[i - 1]) * _b + temp, c = char;
+    temp = 0;
+
+    if (char > 9){
+      c = char % 10;
+      temp = (char - c) * .1;
+    }
+
+    rs = c + rs;
+  }
+
+  if (temp > 0) rs = temp + rs;
+  return rs;
+}
+
+export function multiplication(a: string, b: string){
+  const aNeg = a.startsWith('-'), bNeg = b.startsWith('-')
+  , isDecA = a.includes('.'), isDecB = b.includes('.');
+
+  let valA = a.replace(/^-?0*/, ''), valB = b.replace(/^-?0*/, '');
+
+  if (isDecA) valA = valA.replace(/0*$/, '');
+  if (isDecB) valB = valB.replace(/0*$/, '');
+
+  const lengthDecA = isDecA ? valA.length - valA.indexOf('.') - 1 : 0
+  , lengthDecB = isDecB ? valB.length - valB.indexOf('.') - 1 : 0
+  , sumDec = lengthDecA + lengthDecB;
+
+  valA = valA.replace('.', '');
+  valB = valB.replace('.', '');
+
+  let rs = '', length = a.length;
+
+  for (let i = 0; i < length; i++){
+    rs = addABPositive(rs, multiplicationWithSingle(b, a[length - i - 1]) + '0'.repeat(i));
+  }
+
+  if (sumDec){
+    rs = [ rs.substring(0, rs.length - sumDec), rs.substring(rs.length - sumDec) ].join('.');
+  }
+
+  const neg = (aNeg && !bNeg) || (!aNeg && bNeg);
+  return `${ neg ? '-' : '' }${ rs }`;
 }
