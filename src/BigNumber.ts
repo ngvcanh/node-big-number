@@ -331,7 +331,7 @@ class BigNumber{
   }
 
   static revert(value: string, options?: BigNumberFormatOptions){
-    if (!this.isMatch(value)) return NaN;
+    if (!this.isMatch(value)) return '';
     if (options?.comma && this.isComma(value)) return this.revertComma(value);
     if (this.isFormat(value)) return this.revertFormat(value);
     if (this.isComma(value)) return this.revertComma(value);
@@ -351,10 +351,11 @@ class BigNumber{
   }
 
   static match(value: BigNumberData){
-    return value.toString().match(/^-?(\d*\.?)\d*/);
+    const match = value.toString().match(/^-?(\d*\.?)\d*/);
+    return match ? match[0] : '';
   }
 
-  static isMatch(value: BigNumberData){
+  static isMatch(value: BigNumberData){console.log({ value })
     return this.isNumber(value)
     || this.isFormat(value.toString())
     || this.isComma(value.toString());
