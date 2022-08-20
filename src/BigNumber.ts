@@ -355,7 +355,7 @@ class BigNumber{
     return match ? match[0] : '';
   }
 
-  static isMatch(value: BigNumberData){console.log({ value })
+  static isMatch(value: BigNumberData){
     return this.isNumber(value)
     || this.isFormat(value.toString())
     || this.isComma(value.toString());
