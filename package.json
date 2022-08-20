@@ -3,6 +3,8 @@
   "version": "0.0.5",
   "dependencies": {},
   "main": "index.js",
+  "module": "index.js",
+  "types": "index.d.ts",
   "publishConfig": {
     "access": "public"
   },

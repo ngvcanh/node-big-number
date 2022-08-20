@@ -150,6 +150,14 @@ class BigNumber{
     return !!this._decimal.length;
   }
 
+  get empty(){
+    return this._value === '';
+  }
+
+  get formatValue(){
+    return this.format();
+  }
+
   sameSign(big: BigNumber){
     return (this.negative && big.negative) || (!this.negative && big.negative);
   }
@@ -175,13 +183,13 @@ class BigNumber{
   }
 
   abs(){
-    return BigNumber.from(this.value.toString().replace('-', ''));
+    return BigNumber.from(this.value.toString().replace('-', ''), this._options);
   }
 
   add(...bigs: Array<BigNumber>){
     let rs = this.toString();
     bigs.forEach(big => rs = add(rs, big.toString()));
-    return BigNumber.from(rs);
+    return BigNumber.from(rs, this._options);
   }
 
   sub(...bigs: Array<BigNumber>){
@@ -196,7 +204,7 @@ class BigNumber{
       }
     });
 
-    return BigNumber.from(rs);
+    return BigNumber.from(rs, this._options);
   }
 
   mul(){
@@ -208,14 +216,15 @@ class BigNumber{
   }
 
   floor(){
-    return BigNumber.from((this.negative ? '-' : '') + this.int);
+    return BigNumber.from((this.negative ? '-' : '') + this.int, this._options);
   }
 
   ceil(){
     const val = BigNumber.from(this.int);
     return BigNumber.from(
       (this.negative ? '-' : '') +
-      (this.dec === '' ? val : val.add(BigNumber.from(1)))
+      (this.dec === '' ? val : val.add(BigNumber.from(1))),
+      this._options
     )
   }
 
@@ -229,7 +238,11 @@ class BigNumber{
   }
 
   format(options?: BigNumberFormatOptions){
-    return BigNumber.format(this._value, options);
+    const _options = options ?? this._options;
+    const value = BigNumber.format(this._value, { ..._options, comma: false });
+
+    if (!_options?.comma) return value;
+    return value.replace('.', '_').replace(/,/g, '.').replace('_', ',');
   }
 
   revert(value: string){
@@ -277,12 +290,12 @@ class BigNumber{
   }
 
   static from(value: BigNumber | BigNumberData, options?: BigNumberFormatOptions){
-    if (value instanceof BigNumber) return value;
+    if (value instanceof BigNumber) return new this(value.toString(), options);
     return new this(value, options);
   }
 
   static format(value: BigNumberData, options?: BigNumberFormatOptions){
-    const _value = this.from(value).toString();
+    const _value = this.from(value, options).toString();
     if (!_value) return _value;
 
     const arr = _value.split('.');

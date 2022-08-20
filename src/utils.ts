@@ -219,8 +219,8 @@ export function addABNegative(a: string, b: string){
 export function addAPositiveBNegative(a: string, b: string){
   const _b = b.replace('-', '');
   if (aEqualB(a, _b)) return '0';
-  if (aLessThanB(a, _b)) return '-' + minusAGreaterThanBPositive(a, b);
-  return minusAGreaterThanBPositive(a, b);
+  if (aLessThanB(a, _b)) return '-' + minusAGreaterThanBPositive(_b, a);
+  return minusAGreaterThanBPositive(a, _b);
 }
 
 export function addANegativeBPositive(a: string, b: string){
@@ -245,14 +245,13 @@ export function add(a: string, b: string){
 }
 
 export function minusAGreaterThanBPositive(a: string, b: string){
-  let [ intA, decA ] = a.split('.'), [ intB, decB ] = b.split('.')
+  let [ intA, decA = '' ] = a.split('.'), [ intB, decB = '' ] = b.split('.')
   , dec = '', int = '', borrow = false;
 
   if (!isDec(decB)){
-    dec = decA ?? '';
+    dec = decA;
   }
   else{
-    if (decA === undefined) decA = '';
     const max = Math.max(decA.length, decB.length);
 
     for (let i = max - 1; i >= 0; i--){
@@ -274,7 +273,7 @@ export function minusAGreaterThanBPositive(a: string, b: string){
 
   const aLength = intA.length, bLength = intB.length;  
 
-  for (let i = 0; i < aLength - 1; i++){
+  for (let i = 0; i < aLength; i++){
     let char1 = parseInt(intA[aLength - i - 1]), char2 = parseInt(intB[bLength - i - 1] ?? '0');
 
     if (borrow){
